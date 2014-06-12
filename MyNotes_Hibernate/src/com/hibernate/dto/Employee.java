@@ -1,18 +1,31 @@
 package com.hibernate.dto;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.AttributeOverrides;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.JoinTable;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.CollectionId;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "employee_details")
@@ -24,19 +37,22 @@ public class Employee {
 	private int id;
 	@Column(name = "Name")
 	private String name;
-	@Temporal(TemporalType.DATE)
-	private Date dob;
 
-	@Column(name = "Phone")
-	private String mobile;
-	@Embedded
-	@AttributeOverrides({
-			@AttributeOverride(name = "street", column = @Column(name = "Street_Permanent")),
-			@AttributeOverride(name = "city", column = @Column(name = "City_Permanent")),
-			@AttributeOverride(name = "state", column = @Column(name = "State_Permanent")),
-			@AttributeOverride(name = "pincode", column = @Column(name = "Pincode_Permanent")) })
-	private Address permanentAddress;
-	private Address presentAddress;
+	@ElementCollection(fetch=FetchType.EAGER)
+	@JoinTable(name="Employee_Address",
+				joinColumns=@JoinColumn(name="Id")
+			   )
+	@GenericGenerator(name = "hilo-gen", strategy="hilo")
+	@CollectionId(columns = { @Column(name="Address_Id") }, generator = "hilo-gen", type = @Type(type="long"))
+	private Collection<Address> listOfAddress = new ArrayList<Address>();
+
+	public Collection<Address> getListOfAddress() {
+		return listOfAddress;
+	}
+
+	public void setListOfAddress(Collection<Address> listOfAddress) {
+		this.listOfAddress = listOfAddress;
+	}
 
 	public int getId() {
 		return id;
@@ -54,36 +70,6 @@ public class Employee {
 		this.name = name;
 	}
 
-	public Date getDob() {
-		return dob;
-	}
-
-	public void setDob(Date dob) {
-		this.dob = dob;
-	}
-
-	public String getMobile() {
-		return mobile;
-	}
-
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
-
-	public Address getPermanentAddress() {
-		return permanentAddress;
-	}
-
-	public void setPermanentAddress(Address permanentAddress) {
-		this.permanentAddress = permanentAddress;
-	}
-
-	public Address getPresentAddress() {
-		return presentAddress;
-	}
-
-	public void setPresentAddress(Address presentAddress) {
-		this.presentAddress = presentAddress;
-	}
+	
 
 }
